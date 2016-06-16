@@ -1,0 +1,8 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/my-app.html",
+  "fragments": [
+    "src/my-friends-list.html",
+    "src/my-add-friends.html"
+  ]
+}

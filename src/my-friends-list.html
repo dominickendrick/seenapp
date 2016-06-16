@@ -1,0 +1,123 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<dom-module id="my-friends-list">
+<style>
+  .white {
+    background-color: white;
+  }
+  paper-button.green {
+    background-color: var(--paper-green-500);
+    color: white;
+  }
+  .underline {
+    border-bottom: 1px var(--paper-grey-300) solid;
+  }
+  paper-fab.bottom {
+    position: absolute;
+    bottom: 20px;
+    right:20px;
+  }
+</style>
+  <template>
+    <paper-material class="white" elevation="1">
+      <template is="dom-repeat" items="{{friends}}">
+          <paper-item class="underline">
+            <paper-item-body two-line>
+              <div>{{item.firstName}} {{item.lastName}}</div>
+              <div secondary>Last seen: {{item.lastSeen}}</div>
+            </paper-item-body>
+            <paper-button raised class="green indigo">Seen</paper-button>
+          </paper-item>
+      </template>
+    </paper-material>
+    <paper-fab id="add-friend" class="bottom" icon="social:group-add" data-dialog="add-friends"></paper-fab>
+    <paper-dialog id="addFriends" class="paper-date-picker-dialog" role="alertdialog">
+      <h2>Add a new friend</h2>
+      <form is="iron-form" id="form" method="post" >
+        <paper-input
+          label="First Name"
+          name="firstName"
+          bind-value = " {{firstName}}"
+          inline required auto-validate
+          error-message="Enter a name"></paper-input>
+
+        <paper-input
+          label="Last Name"
+          name="lastName"
+          bind-value = " {{lastName}}"
+          inline required auto-validate
+          error-message="Enter a name">
+          </paper-input>
+
+                  <paper-input
+          label="Last Seen"
+          name="lastSeen"
+          bind-value = " {{lastSeen}}"
+          hidden
+          value = "1 day ago"
+          >
+          </paper-input>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm on-click="saveFriend">Add</paper-button>
+        </div>
+      </form>
+    </paper-dialog>
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'my-friends-list',
+      ready: function() {
+
+        var form = this.$.form;
+        var self = this;
+
+        form.addEventListener('iron-form-presubmit', function(event) {
+          event.preventDefault();
+          var data = form.serialize();
+          self.friends = self.friends.concat(data);
+        });
+      },
+
+      listeners: {
+        'add-friend.tap': 'dialogOpen'
+      },
+
+      dialogOpen: function(e) {
+        var dialog = this.$.addFriends;
+        if (dialog) {
+          dialog.open();
+        }
+      },
+
+      properties: {
+        friends: {
+          type: Array,
+          value: [
+            {firstName: 'Dominic', lastName: 'Kendrick', lastSeen: '15 days ago'},
+            {firstName: 'Betsy', lastName: 'Kendrick', lastSeen: '1 days ago'}
+          ],
+        },
+      },
+
+      saveFriend: function(e) {
+        this.$.form.submit();
+      }
+
+    });
+
+  </script>
+
+</dom-module>
