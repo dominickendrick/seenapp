@@ -58,13 +58,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           error-message="Enter a name">
           </paper-input>
 
-                  <paper-input
+        <paper-input
           label="Last Seen"
           name="lastSeen"
           bind-value = " {{lastSeen}}"
           hidden
-          value = "1 day ago"
-          >
+          value = "1 day ago">
           </paper-input>
         <div class="buttons">
           <paper-button dialog-dismiss>Cancel</paper-button>
@@ -87,7 +86,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         form.addEventListener('iron-form-presubmit', function(event) {
           event.preventDefault();
           var data = form.serialize();
-          self.friends = self.friends.concat(data);
+          self.push('friends', data);
         });
       },
 

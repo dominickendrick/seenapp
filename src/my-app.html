@@ -28,8 +28,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog-shared-styles.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
-<link rel="import" href="../bower_components/paper-date-picker/paper-date-picker-dialog-style.html">
 <link rel="import" href="my-add-friends.html">
 
 <dom-module id="my-app">
@@ -75,6 +77,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
     </style>
+    <firebase-app auth-domain="[[ authDomain ]]"
+      database-url="[[ databaseURL ]]"
+      api-key="[[ apiKey ]]">
+    </firebase-app>
+    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+    </firebase-auth>
+
 
     <app-location route="{{route}}"></app-location>
     <app-route
@@ -94,11 +103,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div title>Seen App</div>
           </app-toolbar>
         </app-header>
-          <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-            <my-friends-list name="friends-list"></my-friends-list>
-          </iron-pages>
-      </app-header-layout>
+        
+          <div class="error" hidden$="[[!error]]">
+            <div hidden$="[[user]]">
+              <h3>Email/Password</h3>
+              <iron-form on-submit="signInWithEmailAndPassword">
+                <paper-input value="{{email::input}}" type="email" label="Email" ></paper-input>
+                <paper-input value="{{password::input}}" type="password" label="Password" ></paper-input>
+                <paper-button type="submit" on-tap="signInWithEmailAndPassword" raised >Sign In</paper-button>
+                <paper-button type="button" on-tap="createUserWithEmailAndPassword" raised >Sign Up</paper-button>
+              </iron-form>
+              <h3>Anonymous/OAuth</h3>
+              <p>
+                <paper-button on-tap="signInWithGoogle" raised>Sign In With Google</paper-button>
+              </p>
+            </div>
+            <div hidden$="[[!user]]">
+              <table>
+                <tr><th>uid</th> <td>[[user.uid]]</td></tr>
+                <tr><th>displayName</th> <td>[[user.displayName]]</td></tr>
+                <tr><th>email</th> <td>[[user.email]]</td></tr>
+                <tr><th>emailVerified</th> <td>[[user.emailVerified]]</td></tr>
+              </table>
 
+              <paper-button on-tap="signOut">Sign Out</paper-button>
+          </div>
+        
+        <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
+          <my-friends-list hidden$="[[!user]]" name="friends-list"></my-friends-list>
+        </iron-pages>
+      </app-header-layout>
     </app-drawer-layout>
 
   </template>
@@ -117,6 +151,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_pageChanged'
         },
 
+        apiKey: {
+          type: String,
+          value: "AIzaSyBaUXSgLmXfvKF7hDdXX9E9mCZgiElzt2s"
+        },
+        authDomain: {
+          type: String,
+          value: "project-2592264278015317328.firebaseapp.com"
+        },
+        databaseURL: {
+          type: String,
+          value: "https://project-2592264278015317328.firebaseio.com"
+        },
+        storageBucket: {
+          type: String
+        }
       },
 
       observers: [
@@ -124,14 +173,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       _routePageChanged: function(page) {
-        this.page = page || 'my-friends-list';
+        this.page = page || 'friends-list';
       },
 
       _pageChanged: function(page) {
         // load page import on demand.
         this.importHref(
           this.resolveUrl('my-' + page + '.html'), null, null, true);
+      },
+
+      signInWithGoogle: function(){
+        this.$.auth.signInWithRedirect()
+          .then(function(response) {
+            console.log(user);
+           // this._pageChanged('friends-list')
+          })
+          .catch(function(error) { console.log("poot")});
+      },
+      signOut: function() {
+          this.error = null;
+          this.$.auth.signOut();
+      },
+      handleError: function(e) {
+        console.log("eek:", e.detail.message);
       }
+
 
     });
 
