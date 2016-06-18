@@ -28,8 +28,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   }
 </style>
   <template>
+  <firebase-document
+    id="liveNewFriend"
+    path="/users/{{user.uid}}/friends/{{friendId}}"
+    data="{{liveNewFriend}}"
+    app-name="seen">
+  </firebase-document>
+
+  <firebase-document
+    id="liveFriendsTable"
+    app-name="seen"
+    path="/users/{{user.uid}}/friends"
+    data="{{liveFriends}}">
+  </firebase-document>
+
     <paper-material class="white" elevation="1">
-      <template is="dom-repeat" items="{{friends}}">
+      <template is="dom-repeat" items="{{_toArray(liveFriends)}}" as="item">
           <paper-item class="underline">
             <paper-item-body two-line>
               <div>{{item.firstName}} {{item.lastName}}</div>
@@ -79,15 +93,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       is: 'my-friends-list',
       ready: function() {
-
         var form = this.$.form;
-        var self = this;
 
         form.addEventListener('iron-form-presubmit', function(event) {
+          var newFriend = form.serialize();
+          this.$.liveNewFriend.data = newFriend;
+          this.$.liveNewFriend.save("/users/" + this.user.uid + "/friends");
           event.preventDefault();
-          var data = form.serialize();
-          self.push('friends', data);
-        });
+        }.bind(this));
       },
 
       listeners: {
@@ -102,18 +115,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       properties: {
-        friends: {
-          type: Array,
-          value: [
-            {firstName: 'Dominic', lastName: 'Kendrick', lastSeen: '15 days ago'},
-            {firstName: 'Betsy', lastName: 'Kendrick', lastSeen: '1 days ago'}
-          ],
+        user: {
+          type: Object
+        },
+        liveFriends: {
+          type: Object,
+          observer: 'dataChanged'
         },
       },
 
       saveFriend: function(e) {
         this.$.form.submit();
-      }
+      },
+      dataChanged: function(e) {
+        console.log("i run", e);
+      },
+      _toArray: function(obj) {
+            return Object.keys(obj).map(function(key) {
+                return obj[key];
+            });
+        }
 
     });
 

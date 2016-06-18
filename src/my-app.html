@@ -28,9 +28,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog-shared-styles.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
 <link rel="import" href="my-add-friends.html">
 
@@ -77,11 +79,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
     </style>
-    <firebase-app auth-domain="[[ authDomain ]]"
+    <firebase-app id="firebase" auth-domain="[[ authDomain ]]"
       database-url="[[ databaseURL ]]"
-      api-key="[[ apiKey ]]">
+      api-key="[[ apiKey ]]"
+      name="seen">
     </firebase-app>
-    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+    <firebase-auth id="auth" user="{{user}}" provider="google"
+      on-error="handleError"
+      app-name="seen">
     </firebase-auth>
 
 
@@ -101,9 +106,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div title>Seen App</div>
+            <div hidden$="[[!user]]">[[user.displayName]]<paper-button on-tap="signOut">Sign Out</paper-button></div>
           </app-toolbar>
         </app-header>
-        
+        <paper-card>
           <div class="error" hidden$="[[!error]]">
             <div hidden$="[[user]]">
               <h3>Email/Password</h3>
@@ -118,19 +124,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <paper-button on-tap="signInWithGoogle" raised>Sign In With Google</paper-button>
               </p>
             </div>
-            <div hidden$="[[!user]]">
-              <table>
-                <tr><th>uid</th> <td>[[user.uid]]</td></tr>
-                <tr><th>displayName</th> <td>[[user.displayName]]</td></tr>
-                <tr><th>email</th> <td>[[user.email]]</td></tr>
-                <tr><th>emailVerified</th> <td>[[user.emailVerified]]</td></tr>
-              </table>
-
-              <paper-button on-tap="signOut">Sign Out</paper-button>
+            </div>
           </div>
-        
+        </paper-card>
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <my-friends-list hidden$="[[!user]]" name="friends-list"></my-friends-list>
+          <my-friends-list hidden$="[[!user]]" name="friends-list" user="{{user}}"></my-friends-list>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
