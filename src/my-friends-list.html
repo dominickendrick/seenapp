@@ -81,8 +81,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <paper-date-input
           label="Last Seen"
-          always-float-label 
-          placeholder="DD/MM/YYYY"
           name="lastSeen"
           bind-value = " {{lastSeen}}"
           inline required
@@ -104,19 +102,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer({
 
       is: 'my-friends-list',
-      ready: function() {
-        var form = this.$.form;
-
-        form.addEventListener('iron-form-presubmit', function(event) {
-          var newFriend = form.serialize();
-          this.$.liveNewFriend.data = newFriend;
-          this.$.liveNewFriend.save("/users/" + this.user.uid + "/friends");
-          event.preventDefault();
-        }.bind(this));
-      },
 
       listeners: {
-        'add-friend.tap': 'dialogOpen'
+        'add-friend.tap': 'dialogOpen',
+        'iron-form-presubmit' : 'addFriend'
+      },
+
+      properties: {
+        user: {
+          type: Object
+        }
       },
 
       dialogOpen: function(e) {
@@ -126,15 +121,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      properties: {
-        user: {
-          type: Object
-        }
+      addFriend: function(e) {
+        var newFriend = this.$.form.serialize();
+        this.$.liveNewFriend.data = newFriend;
+        this.$.liveNewFriend.save("/users/" + this.user.uid + "/friends");
+        event.preventDefault();
       },
 
       saveFriend: function(e) {
         this.$.form.submit();
       },
+
       seenFriend: function(item) {
         var userId = item.currentTarget.dataUserId;
         var currentUser = this.liveFriends[userId];
@@ -142,8 +139,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var path = "/users/" + this.user.uid + "/friends/" + userId;
 
         currentUser.lastSeen = parseInt(moment().format("x"));
-        return table.setStoredValue(path, currentUser);
+        table.setStoredValue(path, currentUser);
       },
+
       _toArray: function(obj) {
         return Object.keys(obj).map(function(key) {
             var item = obj[key];
@@ -151,10 +149,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return item;
         });
       },
+
       _fromTimestamp: function(timestamp) {
         var durationLastSeen = moment(parseInt(timestamp)).diff(moment())
         return moment.duration(durationLastSeen).humanize(true)
-      },
+      }
 
     });
 
