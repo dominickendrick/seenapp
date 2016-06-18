@@ -51,7 +51,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <div secondary>Last seen: {{_fromTimestamp(item.lastSeen)}}</div>
             </paper-item-body>
             <!-- <iron-icon icon="delete" ></iron-icon> -->
-            <paper-button raised class="green indigo">Seen</paper-button>
+            <paper-button 
+              raised 
+              class="green indigo" 
+              on-tap="seenFriend" 
+              data-user-id="{{item.userId}}" 
+              >Seen</paper-button>
           </paper-item>
       </template>
     </paper-material>
@@ -124,22 +129,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       properties: {
         user: {
           type: Object
-        },
-        liveFriends: {
-          type: Object,
-          observer: 'dataChanged'
-        },
+        }
       },
 
       saveFriend: function(e) {
         this.$.form.submit();
       },
-      dataChanged: function(e) {
-        console.log("i run", e);
+      seenFriend: function(item) {
+        var userId = item.currentTarget.dataUserId;
+        var currentUser = this.liveFriends[userId];
+        var table = this.$.liveFriendsTable;
+        var path = "/users/" + this.user.uid + "/friends/" + userId;
+
+        currentUser.lastSeen = parseInt(moment().format("x"));
+        return table.setStoredValue(path, currentUser);
       },
       _toArray: function(obj) {
         return Object.keys(obj).map(function(key) {
-            return obj[key];
+            var item = obj[key];
+            item["userId"] = key;
+            return item;
         });
       },
       _fromTimestamp: function(timestamp) {
