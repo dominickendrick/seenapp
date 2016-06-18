@@ -9,6 +9,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <dom-module id="my-friends-list">
 <style>
   .white {
@@ -47,8 +48,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-item class="underline">
             <paper-item-body two-line>
               <div>{{item.firstName}} {{item.lastName}}</div>
-              <div secondary>Last seen: {{item.lastSeen}}</div>
+              <div secondary>Last seen: {{_fromTimestamp(item.lastSeen)}}</div>
             </paper-item-body>
+            <!-- <iron-icon icon="delete" ></iron-icon> -->
             <paper-button raised class="green indigo">Seen</paper-button>
           </paper-item>
       </template>
@@ -72,13 +74,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           error-message="Enter a name">
           </paper-input>
 
-        <paper-input
+        <paper-date-input
           label="Last Seen"
+          always-float-label 
+          placeholder="DD/MM/YYYY"
           name="lastSeen"
           bind-value = " {{lastSeen}}"
-          hidden
-          value = "1 day ago">
-          </paper-input>
+          inline required
+          date-format='DD/MM/YYYY'
+          to-timestamp
+          value={{value}}
+          >
+          </paper-date-input>
         <div class="buttons">
           <paper-button dialog-dismiss>Cancel</paper-button>
           <paper-button dialog-confirm on-click="saveFriend">Add</paper-button>
@@ -131,10 +138,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         console.log("i run", e);
       },
       _toArray: function(obj) {
-            return Object.keys(obj).map(function(key) {
-                return obj[key];
-            });
-        }
+        return Object.keys(obj).map(function(key) {
+            return obj[key];
+        });
+      },
+      _fromTimestamp: function(timestamp) {
+        var durationLastSeen = moment(parseInt(timestamp)).diff(moment())
+        return moment.duration(durationLastSeen).humanize(true)
+      },
 
     });
 
