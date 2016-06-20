@@ -133,12 +133,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </paper-menu-button>
           </app-toolbar>
         </app-header>
-        <paper-card>
-          <div class="error" hidden$="[[!error]]">
-            <div hidden$="[[user]]">
-              <paper-button on-tap="signInWithGoogle" raised>Sign In With Google</paper-button>
-            </div>
-            </div>
+        <paper-card  hidden$="[[user]]" image="http://placekitten.com/g/1000/300" heading="Seen App">
+          <div class="card-content">
+          <p>Seen any friends recently</p>
+          </div>
+          <div class="card-actions">
+            <paper-button on-tap="signInWithGoogle" raised>Sign In With Google</paper-button>
           </div>
         </paper-card>
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
@@ -152,7 +152,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
 
     Polymer({
-//TODO: logged in styles
 //TODO: login page styles
 //TODO: test serviceworker
       is: 'my-app',
