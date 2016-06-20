@@ -26,8 +26,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog-shared-styles.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
@@ -42,7 +46,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
 
-    <style>
+    <style is="custom-style"> 
 
       :host {
         display: block;
@@ -77,9 +81,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       .white {
         background-color: white;
+        color: black;
       }
-
-
+      paper-icon-button.user-photo {
+        width:45px;
+        height:45px;
+        padding:0px;
+      }
+      paper-icon-button.user-photo::shadow iron-icon::shadow img{
+        border-radius: 50%;
+      }
     </style>
     <firebase-app id="firebase" auth-domain="[[ authDomain ]]"
       database-url="[[ databaseURL ]]"
@@ -106,25 +117,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div title>Seen App</div>
-            <div hidden$="[[!user]]">[[user.displayName]]<paper-button on-tap="signOut">Sign Out</paper-button></div>
+            <paper-menu-button
+              hidden$="[[!user]]"
+              horizontal-align="right"
+              horizontal-offset="10"
+              vertical-offset="55"
+              no-animations>
+              <paper-icon-button src="[[user.photoURL]]" class="dropdown-trigger user-photo" ></paper-icon-button>
+              <paper-menu class="dropdown-content white" style="top:30px;">
+                <paper-icon-item  on-tap="signOut">
+                <iron-icon icon="backspace" item-icon></iron-icon>
+                Sign Out</paper-icon-item>
+              </paper-menu>
+            </paper-menu-button>
           </app-toolbar>
         </app-header>
         <paper-card>
           <div class="error" hidden$="[[!error]]">
             <div hidden$="[[user]]">
-              <h3>Email/Password</h3>
-              <iron-form on-submit="signInWithEmailAndPassword">
-                <paper-input value="{{email::input}}" type="email" label="Email" ></paper-input>
-                <paper-input value="{{password::input}}" type="password" label="Password" ></paper-input>
-                <paper-button type="submit" on-tap="signInWithEmailAndPassword" raised >Sign In</paper-button>
-                <paper-button type="button" on-tap="createUserWithEmailAndPassword" raised >Sign Up</paper-button>
-              </iron-form>
-              <h3>Anonymous/OAuth</h3>
-              <p>
-                <paper-button on-tap="signInWithGoogle" raised>Sign In With Google</paper-button>
-              </p>
+              <paper-button on-tap="signInWithGoogle" raised>Sign In With Google</paper-button>
             </div>
             </div>
           </div>
@@ -140,7 +152,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
 
     Polymer({
-
+//TODO: logged in styles
+//TODO: login page styles
+//TODO: test serviceworker
       is: 'my-app',
 
       properties: {
@@ -184,11 +198,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       signInWithGoogle: function(){
         this.$.auth.signInWithRedirect()
-          .then(function(response) {
-            console.log(user);
-           // this._pageChanged('friends-list')
-          })
-          .catch(function(error) { console.log("poot")});
       },
       signOut: function() {
           this.error = null;
