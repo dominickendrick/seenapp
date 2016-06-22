@@ -43,9 +43,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     data="{{liveFriends}}">
   </firebase-document>
 
-    <paper-material class="white" elevation="1">
+    <paper-material class="white friend-container" elevation="1">
       <template is="dom-repeat" items="{{_toArray(liveFriends)}}" as="item">
-          <paper-item class="underline">
+          <paper-item class="underline friend">
             <paper-item-body two-line>
               <div>{{item.firstName}} {{item.lastName}}</div>
               <div secondary>Last seen: {{_fromTimestamp(item.lastSeen)}}</div>
@@ -101,7 +101,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 //TODO: delete items
-//TODO: sort order
 //TODO: coloring
       is: 'my-friends-list',
 
@@ -143,13 +142,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         currentUser.lastSeen = parseInt(moment().format("x"));
         table.setStoredValue(path, currentUser);
       },
+      _sort: function(friends) {
+        console.log(friends);
+        return friends.sort(function (a, b) {
+          console.log(a.lastSeen,b.lastSeen);
+          if (a.lastSeen > b.lastSeen) {
+            return 1;
+          }
+          if (a.lastSeen < b.lastSeen) {
+            return -1;
+          }
+          return 0;
+        });
+      },
 
       _toArray: function(obj) {
-        return Object.keys(obj).map(function(key) {
+        return this._sort(
+          Object.keys(obj).map(function(key) {
             var item = obj[key];
             item["userId"] = key;
             return item;
-        });
+          })
+        );
       },
 
       _fromTimestamp: function(timestamp) {
