@@ -27,12 +27,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     bottom: 20px;
     right:20px;
   }
+  paper-material.friend-container paper-item.friend {
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+  }
 
-  paper-material.friend-container paper-item.friend:nth-child(1)  { background-color: var(--paper-pink-400) }
-  paper-material.friend-container paper-item.friend:nth-child(2)  { background-color: var(--paper-pink-300) }
-  paper-material.friend-container paper-item.friend:nth-child(3)  { background-color: var(--paper-pink-200) }
-  paper-material.friend-container paper-item.friend:nth-child(4)  { background-color: var(--paper-pink-100) }
+  paper-material.friend-container paper-item.friend:nth-child(-n+3) [secondary] {
+    color:white;
+  }
 
+  paper-material.friend-container paper-item.friend:nth-child(1) {
+    background-color: var(--paper-pink-400);
+  }
+  paper-material.friend-container paper-item.friend:nth-child(2) {
+    background-color: var(--paper-pink-300);
+  }
+  paper-material.friend-container paper-item.friend:nth-child(3) {
+    background-color: var(--paper-pink-200);
+  }
+  paper-material.friend-container paper-item.friend:nth-child(4) {
+    background-color: var(--paper-pink-100) }
   }
 </style>
   <template>
@@ -52,18 +69,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <paper-material class="white friend-container" elevation="1">
       <template is="dom-repeat" items="{{_toArray(liveFriends)}}" as="item">
-          <paper-item class="underline friend">
+          <paper-item class="underline friend" data-user-id="{{item.userId}}">
             <paper-item-body two-line>
               <div>{{item.firstName}} {{item.lastName}}</div>
               <div secondary>Last seen: {{_fromTimestamp(item.lastSeen)}}</div>
             </paper-item-body>
-            <!-- <iron-icon icon="delete" ></iron-icon> -->
-            <paper-button 
-              raised 
-              class="green indigo" 
-              on-tap="seenFriend" 
-              data-user-id="{{item.userId}}" 
-              >Seen</paper-button>
+            <paper-icon-button on-tap="deleteFriend" icon="delete"></paper-icon-button>
+            <paper-button
+              raised
+              class="green indigo"
+              on-tap="seenFriend"
+              data-user-id="{{item.userId}}">
+              Seen
+            </paper-button>
           </paper-item>
       </template>
     </paper-material>
@@ -112,7 +130,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       listeners: {
         'add-friend.tap': 'dialogOpen',
-        'iron-form-presubmit' : 'addFriend'
+        'iron-form-presubmit' : 'addFriend',
+        'iron-swipe': 'deleteFriend'
       },
 
       properties: {
@@ -139,19 +158,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.form.submit();
       },
 
+      deleteFriend: function(item) {
+        var userId = item.currentTarget.parentNode.dataUserId;
+        var table = this.$.liveFriendsTable;
+        var path = "/users/" + this.user.uid + "/friends/" + userId;
+        table.setStoredValue(path, null)
+      },
+
       seenFriend: function(item) {
         var userId = item.currentTarget.dataUserId;
         var currentUser = this.liveFriends[userId];
         var table = this.$.liveFriendsTable;
         var path = "/users/" + this.user.uid + "/friends/" + userId;
-
         currentUser.lastSeen = parseInt(moment().format("x"));
         table.setStoredValue(path, currentUser);
       },
       _sort: function(friends) {
-        console.log(friends);
         return friends.sort(function (a, b) {
-          console.log(a.lastSeen,b.lastSeen);
           if (a.lastSeen > b.lastSeen) {
             return 1;
           }
